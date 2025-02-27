@@ -20,6 +20,6 @@ public partial class Course
             .ToLower().Replace(" ", "-");
     }
 
-    [GeneratedRegex("[^0-9A-Za-z _-]", RegexOptions.NonBacktracking, 5)]
+    [GeneratedRegex("[^0-9A-Za-z _-]", RegexOptions.NonBacktracking, 100)]
     internal static partial Regex SlugRegex();
 }

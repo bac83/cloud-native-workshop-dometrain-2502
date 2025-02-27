@@ -62,6 +62,8 @@ builder.Services.AddSingleton<DbInitializer>();
 builder.Services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>();
 builder.AddNpgsqlDataSource("dometrain");
 
+builder.AddAzureCosmosClient("cartdb");
+
 builder.Services.AddSingleton<IPasswordHasher<Student>, PasswordHasher<Student>>();
 builder.Services.AddSingleton<IIdentityService, IdentityService>();
 
