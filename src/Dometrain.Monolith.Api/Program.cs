@@ -9,6 +9,7 @@ using Dometrain.Monolith.Api.Orders;
 using Dometrain.Monolith.Api.ShoppingCarts;
 using Dometrain.Monolith.Api.Students;
 using FluentValidation;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -21,7 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 builder.AddServiceDefaults();
-    
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 builder.Services.AddSwaggerGen(x => x.OperationFilter<SwaggerDefaultValues>());
@@ -48,8 +49,8 @@ builder.Services.AddAuthentication(x =>
 
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("ApiAdmin", p => p.AddRequirements(new AdminAuthRequirement(config["Identity:AdminApiKey"]!)))
-    .AddPolicy("Admin", p => p.RequireAssertion(c => 
-            c.User.HasClaim(m => m is { Type: "is_admin", Value: "true" })));
+    .AddPolicy("Admin", p => p.RequireAssertion(c =>
+        c.User.HasClaim(m => m is { Type: "is_admin", Value: "true" })));
 
 builder.Services.AddScoped<ApiKeyAuthFilter>();
 
@@ -66,6 +67,21 @@ builder.AddNpgsqlDataSource("dometrain");
 builder.AddAzureCosmosClient("cartdb");
 builder.AddRedisClient("redis");
 
+builder.AddMassTransitRabbitMq("rabbitmq", massTransitConfiguration: configurator =>
+{
+    configurator.AddConsumers(typeof(Program).Assembly);
+});
+
+// builder.Services.AddMassTransit(s =>
+// {
+//     s.AddConsumers(typeof(Program).Assembly);
+//     s.UsingRabbitMq((context, cfg) =>
+//     {
+//         cfg.Host(new Uri(config["ConnectionStrings:rabbitmq"]!));
+//         cfg.ConfigureEndpoints(context);
+//     });
+// });
+
 builder.Services.AddSingleton<IPasswordHasher<Student>, PasswordHasher<Student>>();
 builder.Services.AddSingleton<IIdentityService, IdentityService>();
 
@@ -76,9 +92,14 @@ builder.Services.AddSingleton<ICourseService, CourseService>();
 
 builder.Services.AddSingleton<CourseRepository>();
 builder.Services.AddSingleton<ICourseRepository>(x =>
-    new CachedCourseRepository(x.GetRequiredService<CourseRepository>(), x.GetRequiredService<IConnectionMultiplexer>()));
+    new CachedCourseRepository(x.GetRequiredService<CourseRepository>(),
+        x.GetRequiredService<IConnectionMultiplexer>()));
 
-builder.Services.AddSingleton<IShoppingCartRepository, ShoppingCartRepository>();
+builder.Services.AddSingleton<ShoppingCartRepository>();
+builder.Services.AddSingleton<IShoppingCartRepository>(x =>
+    new CachedShoppingCartRepository(x.GetRequiredService<ShoppingCartRepository>(),
+        x.GetRequiredService<IConnectionMultiplexer>()));
+
 builder.Services.AddSingleton<IShoppingCartService, ShoppingCartService>();
 
 builder.Services.AddSingleton<IEnrollmentRepository, EnrollmentRepository>();

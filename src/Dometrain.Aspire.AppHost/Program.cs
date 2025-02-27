@@ -19,13 +19,15 @@ var redis = builder.AddRedis("redis")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithRedisInsight(resourceBuilder => resourceBuilder.WithLifetime(ContainerLifetime.Persistent));
 
+var rabbitmq = builder.AddRabbitMQ("rabbitmq")
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithManagementPlugin();
+
 builder.AddProject<Projects.Dometrain_Monolith_Api>("dometrain-api")
-    .WithReference(mainDb)
-    .WithReference(cartAccount)
-    .WithReference(redis)
-    .WaitFor(cartAccount)
-    .WaitFor(mainDb)
-    .WaitFor(redis)
+    .WithReference(mainDb).WaitFor(mainDb)
+    .WithReference(cartAccount).WaitFor(cartAccount)
+    .WithReference(redis).WaitFor(redis)
+    .WithReference(rabbitmq).WaitFor(rabbitmq)
     .WithReplicas(5);
 
 var app = builder.Build();
