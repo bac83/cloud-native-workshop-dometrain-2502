@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Insomnia_collection.json = Insomnia_collection.json
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dometrain.Aspire.AppHost", "src\Dometrain.Aspire.AppHost\Dometrain.Aspire.AppHost.csproj", "{F46B8E9D-02EF-4763-99DD-B0E3E28BA62B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dometrain.Aspire.ServiceDefaults", "src\Dometrain.Aspire.ServiceDefaults\Dometrain.Aspire.ServiceDefaults.csproj", "{C749AEDC-6424-498C-90A2-F825BD2D6A18}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,11 +22,21 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BCD98E15-8F73-4F5A-8F9B-3A1BC752DB41} = {EA020C9E-BECD-40C1-98B3-48070D728500}
+		{F46B8E9D-02EF-4763-99DD-B0E3E28BA62B} = {EA020C9E-BECD-40C1-98B3-48070D728500}
+		{C749AEDC-6424-498C-90A2-F825BD2D6A18} = {EA020C9E-BECD-40C1-98B3-48070D728500}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{BCD98E15-8F73-4F5A-8F9B-3A1BC752DB41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BCD98E15-8F73-4F5A-8F9B-3A1BC752DB41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCD98E15-8F73-4F5A-8F9B-3A1BC752DB41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCD98E15-8F73-4F5A-8F9B-3A1BC752DB41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F46B8E9D-02EF-4763-99DD-B0E3E28BA62B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F46B8E9D-02EF-4763-99DD-B0E3E28BA62B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F46B8E9D-02EF-4763-99DD-B0E3E28BA62B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F46B8E9D-02EF-4763-99DD-B0E3E28BA62B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C749AEDC-6424-498C-90A2-F825BD2D6A18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C749AEDC-6424-498C-90A2-F825BD2D6A18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C749AEDC-6424-498C-90A2-F825BD2D6A18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C749AEDC-6424-498C-90A2-F825BD2D6A18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

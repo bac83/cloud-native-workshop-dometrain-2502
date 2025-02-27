@@ -24,4 +24,8 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Dometrain.Aspire.ServiceDefaults\Dometrain.Aspire.ServiceDefaults.csproj" />
+    </ItemGroup>
+
 </Project>
