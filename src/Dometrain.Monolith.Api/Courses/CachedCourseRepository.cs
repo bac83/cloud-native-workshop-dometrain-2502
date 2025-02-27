@@ -24,18 +24,65 @@ public class CachedCourseRepository : ICourseRepository
 
         var db = _connectionMultiplexer.GetDatabase();
         var serializeCourse = JsonSerializer.Serialize(course);
-        await db.StringSetAsync($"course:id:{course.Id}", serializeCourse);
+
+        var batch = new KeyValuePair<RedisKey, RedisValue>[]
+        {
+            new($"course:id:{course.Id}", serializeCourse),
+            new($"course:slug:{course.Slug}", course.Id.ToString())
+        };
+        
+        await db.StringSetAsync(batch);
         return created;
     }
 
-    public Task<Course?> GetByIdAsync(Guid id)
+    public async Task<Course?> GetByIdAsync(Guid id)
     {
-        return _courseRepository.GetByIdAsync(id);
+        var db = _connectionMultiplexer.GetDatabase();
+        var cachedCourse = await db.StringGetAsync($"course:id:{id}");
+        if (!cachedCourse.IsNull)
+        {
+            return JsonSerializer.Deserialize<Course>(cachedCourse.ToString());
+        }
+    
+        var course = await _courseRepository.GetByIdAsync(id);
+        if (course is null)
+        {
+            return null;
+        }
+        var serializedCourse = JsonSerializer.Serialize(course);
+        var batch = new KeyValuePair<RedisKey, RedisValue>[]
+        {
+            new($"course:id:{course.Id}", serializedCourse),
+            new($"course:slug:{course.Slug}", course.Id.ToString())
+        };
+        
+        await db.StringSetAsync(batch);
+        return course;
     }
 
-    public Task<Course?> GetBySlugAsync(string slug)
+    public async Task<Course?> GetBySlugAsync(string slug)
     {
-        return _courseRepository.GetBySlugAsync(slug);
+        var db = _connectionMultiplexer.GetDatabase();
+        var cachedCourseKey = await db.StringGetAsync($"course:slug:{slug}");
+    
+        if (!cachedCourseKey.IsNull)
+        {
+            return await GetByIdAsync(Guid.Parse(cachedCourseKey.ToString()));
+        }
+    
+        var course = await _courseRepository.GetBySlugAsync(slug);
+        if (course is null)
+        {
+            return course;
+        }
+        var serializedCourse = JsonSerializer.Serialize(course);
+        var batch = new KeyValuePair<RedisKey, RedisValue>[]
+        {
+            new($"course:id:{course.Id}", serializedCourse),
+            new($"course:slug:{course.Slug}", course.Id.ToString())
+        };
+        await db.StringSetAsync(batch);
+        return course;
     }
 
     public Task<IEnumerable<Course>> GetAllAsync(string nameFilter, int pageNumber, int pageSize)
@@ -43,13 +90,43 @@ public class CachedCourseRepository : ICourseRepository
         return _courseRepository.GetAllAsync(nameFilter, pageNumber, pageSize);
     }
 
-    public Task<Course?> UpdateAsync(Course course)
+    public async Task<Course?> UpdateAsync(Course course)
     {
-        return _courseRepository.UpdateAsync(course);
+        var updated = await _courseRepository.UpdateAsync(course);
+        if (updated is null)
+        {
+            return null;
+        }
+    
+        var db = _connectionMultiplexer.GetDatabase();
+        var serializedCourse = JsonSerializer.Serialize(course);
+        var batch = new KeyValuePair<RedisKey, RedisValue>[]
+        {
+            new($"course:id:{course.Id}", serializedCourse),
+            new($"course:slug:{course.Slug}", course.Id.ToString())
+        };
+        
+        await db.StringSetAsync(batch);
+        return updated;
     }
 
-    public Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
-        return _courseRepository.DeleteAsync(id);
+        var deleted = await _courseRepository.DeleteAsync(id);
+
+        if (!deleted)
+        {
+            return false;
+        }
+    
+        var db = _connectionMultiplexer.GetDatabase();
+        var cachedCourseString = await db.StringGetAsync($"course:id:{id}");
+        if (cachedCourseString.IsNull)
+        {
+            return deleted;
+        }
+        var course = JsonSerializer.Deserialize<Course>(cachedCourseString!)!;
+        var deletedCache = await db.KeyDeleteAsync([$"course:id:{id}", $"course:slug:{course.Slug}"]);
+        return deletedCache > 0;
     }
 }
