@@ -14,12 +14,12 @@ public partial class Course
 
     public required string Author { get; set; }
     
-    private string GenerateSlug()
+    internal string GenerateSlug()
     {
         return SlugRegex().Replace(Name, string.Empty)
             .ToLower().Replace(" ", "-");
     }
 
     [GeneratedRegex("[^0-9A-Za-z _-]", RegexOptions.NonBacktracking, 5)]
-    private static partial Regex SlugRegex();
+    internal static partial Regex SlugRegex();
 }

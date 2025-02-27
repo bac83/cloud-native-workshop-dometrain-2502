@@ -1,19 +1,32 @@
 using Dapper;
+using Npgsql;
 
 namespace Dometrain.Monolith.Api.Database;
 
 public class DbInitializer
 {
-    private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly NpgsqlDataSource _dataSource;
 
-    public DbInitializer(IDbConnectionFactory dbConnectionFactory)
+    public DbInitializer(NpgsqlDataSource dataSource)
     {
-        _dbConnectionFactory = dbConnectionFactory;
+        _dataSource = dataSource;
     }
 
     public async Task InitializeAsync()
     {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+        await using var connection = _dataSource.CreateConnection();
+
+        #region MEGAHACKDONTLOOK
+        var topConnection = new NpgsqlConnection(string.Join(";", connection.ConnectionString.Split(";").Concat(["password=changeme"]).Where(x => !x.StartsWith("database=", StringComparison.OrdinalIgnoreCase))));
+        try
+        {
+            await topConnection.ExecuteAsync("CREATE DATABASE dometrain");
+        }
+        catch
+        {
+        }
+        await topConnection.CloseAsync();
+        #endregion
 
         var script = """
                      create table if not exists students

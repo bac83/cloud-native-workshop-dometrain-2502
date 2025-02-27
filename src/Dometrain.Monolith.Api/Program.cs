@@ -59,7 +59,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Si
 builder.Services.Configure<IdentitySettings>(builder.Configuration.GetSection(IdentitySettings.SettingsKey));
 
 builder.Services.AddSingleton<DbInitializer>();
-builder.Services.AddSingleton<IDbConnectionFactory>(_ => new NpgsqlConnectionFactory(config["Database:ConnectionString"]!));
+builder.Services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>();
+builder.AddNpgsqlDataSource("dometrain");
 
 builder.Services.AddSingleton<IPasswordHasher<Student>, PasswordHasher<Student>>();
 builder.Services.AddSingleton<IIdentityService, IdentityService>();
