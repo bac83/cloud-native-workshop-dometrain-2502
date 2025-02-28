@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dometrain.Cart.Api\Dometrain.Cart.Api.csproj" />
+    <ProjectReference Include="..\Dometrain.Cart.Processor\Dometrain.Cart.Processor.csproj" />
     <ProjectReference Include="..\Dometrain.Monolith.Api\Dometrain.Monolith.Api.csproj" />
   </ItemGroup>
 </Project>

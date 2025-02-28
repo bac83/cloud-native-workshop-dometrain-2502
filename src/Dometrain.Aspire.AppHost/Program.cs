@@ -13,6 +13,9 @@ var mainDb = builder.AddPostgres("main-db", mainDbUsername, mainDbPassword, port
     .AddDatabase("dometrain");
 
 var cartAccount = builder.AddAzureCosmosDB("cosmosdb");
+
+builder.AddProject<Projects.Dometrain_Cart_Processor>("dometrain-cart-processor")
+    .WithReference(cartAccount).WaitFor(cartAccount);
     
 cartAccount.AddCosmosDatabase("cartdb").AddContainer("carts", "/pk");
 
