@@ -1,3 +1,4 @@
+using Dometrain.Monolith.Api.Contracts.Requests;
 using Dometrain.Monolith.Api.Identity;
 
 namespace Dometrain.Monolith.Api.Students;
@@ -10,14 +11,14 @@ public static class StudentEndpoints
     {
         var student = request.MapToStudent();
         var createdStudent = await studentService.CreateAsync(student, request.Password);
-        return TypedResults.CreatedAtRoute(createdStudent, GetStudentEndpointName, new { idOrEmail = createdStudent!.Id });
+        return TypedResults.CreatedAtRoute(createdStudent.MapToResponse(), GetStudentEndpointName, new { idOrEmail = createdStudent!.Id });
     }
     
     public static async Task<IResult> Get(string idOrEmail, IStudentService studentService)
     {
         var isId = Guid.TryParse(idOrEmail, out var id);
         var student = isId ? await studentService.GetByIdAsync(id) : await studentService.GetByEmailAsync(idOrEmail);
-        return student is null ? Results.NotFound() : Results.Ok(student);
+        return student is null ? Results.NotFound() : Results.Ok(student.MapToResponse());
     }
 
     public static async Task<IResult> GetMe(HttpContext httpContext, IStudentService studentService)
@@ -28,13 +29,13 @@ public static class StudentEndpoints
             return Results.NotFound();
         }
         var student = await studentService.GetByIdAsync(userId.Value);
-        return student is null ? Results.NotFound() : Results.Ok(student);
+        return student is null ? Results.NotFound() : Results.Ok(student.MapToResponse());
     }
     
     public static async Task<IResult> GetAll(IStudentService studentService, int pageNumber = 1, int pageSize = 25)
     {
         var students = await studentService.GetAllAsync(pageNumber, pageSize);
-        return Results.Ok(students);
+        return Results.Ok(students.Select(x => x.MapToResponse()));
     }
     
     public static async Task<IResult> Delete(Guid id, IStudentService studentService)

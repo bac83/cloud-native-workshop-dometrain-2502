@@ -30,6 +30,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Dometrain.Aspire.ServiceDefaults\Dometrain.Aspire.ServiceDefaults.csproj" />
+      <ProjectReference Include="..\Dometrain.Monolith.Api.Contracts\Dometrain.Monolith.Api.Contracts.csproj" />
     </ItemGroup>
 
 </Project>
