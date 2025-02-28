@@ -1,4 +1,4 @@
-namespace Dometrain.Monolith.Api.Identity;
+namespace Dometrain.Api.Shared.Identity;
 
 public class IdentitySettings
 {

@@ -1,9 +1,9 @@
 using System.Net;
-using Dapper;
-using Dometrain.Monolith.Api.Database;
+using System.Text.Json;
 using Microsoft.Azure.Cosmos;
+using StackExchange.Redis;
 
-namespace Dometrain.Monolith.Api.ShoppingCarts;
+namespace Dometrain.Cart.Api.ShoppingCarts;
 
 public class ShoppingCartItemDto
 {
@@ -37,15 +37,13 @@ public class ShoppingCartRepository : IShoppingCartRepository
     {
         var container = _cosmosClient.GetContainer(DatabaseId, ContainerId);
         ShoppingCart cart;
-
         try
         {
-            var cartResponse =
-                await container.ReadItemAsync<ShoppingCart>(studentId.ToString(),
-                    new PartitionKey(studentId.ToString()));
+            var cartResponse = await container.ReadItemAsync<ShoppingCart>(
+                studentId.ToString(), new PartitionKey(studentId.ToString()));
             cart = cartResponse.Resource;
         }
-        catch (CosmosException exception) when (exception.StatusCode == HttpStatusCode.NotFound)
+        catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             cart = new ShoppingCart
             {
@@ -104,12 +102,59 @@ public class ShoppingCartRepository : IShoppingCartRepository
         var container = _cosmosClient.GetContainer(DatabaseId, ContainerId);
         try
         {
-            await container.DeleteItemAsync<ShoppingCart>(studentId.ToString(), new PartitionKey(studentId.ToString()));
-            return true;
+            var cart = new ShoppingCart
+            {
+                StudentId = studentId,
+                CourseIds = []
+            };
+
+            var response = await container.UpsertItemAsync(cart);
+            return response.StatusCode == HttpStatusCode.OK;
         }
         catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             return true;
         }
+    }
+}
+
+public class CachedShoppingCartRepository : IShoppingCartRepository
+{
+    private readonly IShoppingCartRepository _shoppingCartRepository;
+    private readonly IConnectionMultiplexer _connectionMultiplexer;
+
+    public CachedShoppingCartRepository(
+        IShoppingCartRepository shoppingCartRepository, 
+        IConnectionMultiplexer connectionMultiplexer)
+    {
+        _shoppingCartRepository = shoppingCartRepository;
+        _connectionMultiplexer = connectionMultiplexer;
+    }
+
+    public async Task<bool> AddCourseAsync(Guid studentId, Guid courseId)
+    {
+        return await _shoppingCartRepository.AddCourseAsync(studentId, courseId);
+    }
+
+    public async Task<ShoppingCart?> GetByIdAsync(Guid studentId)
+    {
+        var db = _connectionMultiplexer.GetDatabase();
+        var cachedCartString = await db.StringGetAsync($"cart_id_{studentId}");
+        if (!cachedCartString.IsNull)
+        {
+            return JsonSerializer.Deserialize<ShoppingCart>(cachedCartString.ToString());
+        }
+        
+        return await _shoppingCartRepository.GetByIdAsync(studentId);
+    }
+
+    public async Task<bool> RemoveItemAsync(Guid studentId, Guid courseId)
+    {
+        return await _shoppingCartRepository.RemoveItemAsync(studentId, courseId);
+    }
+
+    public async Task<bool> ClearAsync(Guid studentId)
+    {
+        return await _shoppingCartRepository.ClearAsync(studentId);
     }
 }

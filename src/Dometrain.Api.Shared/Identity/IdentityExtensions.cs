@@ -1,4 +1,6 @@
-namespace Dometrain.Monolith.Api.Identity;
+using Microsoft.AspNetCore.Http;
+
+namespace Dometrain.Api.Shared.Identity;
 
 public static class IdentityExtensions
 {

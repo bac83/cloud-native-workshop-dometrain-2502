@@ -1,6 +1,6 @@
-using Dometrain.Monolith.Api.Identity;
+using Dometrain.Api.Shared.Identity;
 
-namespace Dometrain.Monolith.Api.ShoppingCarts;
+namespace Dometrain.Cart.Api.ShoppingCarts;
 
 public static class ShoppingCartEndpoints
 {

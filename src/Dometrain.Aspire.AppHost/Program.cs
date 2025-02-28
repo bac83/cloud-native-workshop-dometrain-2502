@@ -12,10 +12,9 @@ var mainDb = builder.AddPostgres("main-db", mainDbUsername, mainDbPassword, port
     //.WithPgAdmin()
     .AddDatabase("dometrain");
 
-var cartAccount = builder.AddAzureCosmosDB("cosmosdb")
-    .AddCosmosDatabase("cartdb");
-
-cartAccount.AddContainer("carts", "/pk");
+var cartAccount = builder.AddAzureCosmosDB("cosmosdb");
+    
+cartAccount.AddCosmosDatabase("cartdb").AddContainer("carts", "/pk");
 
 var redis = builder.AddRedis("redis")
     .WithLifetime(ContainerLifetime.Persistent)
@@ -25,12 +24,15 @@ var rabbitmq = builder.AddRabbitMQ("rabbitmq")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithManagementPlugin();
 
-builder.AddProject<Projects.Dometrain_Monolith_Api>("dometrain-api")
+var mainApi = builder.AddProject<Projects.Dometrain_Monolith_Api>("dometrain-api")
     .WithReference(mainDb).WaitFor(mainDb)
-    .WithReference(cartAccount).WaitFor(cartAccount)
     .WithReference(redis).WaitFor(redis)
-    .WithReference(rabbitmq).WaitFor(rabbitmq)
-    .WithReplicas(5);
+    .WithReference(rabbitmq).WaitFor(rabbitmq);
+
+builder.AddProject<Projects.Dometrain_Cart_Api>("cart-api")
+    .WithReference(cartAccount).WaitFor(cartAccount)
+    .WithReference(mainApi).WaitFor(mainApi)
+    .WithReference(redis).WaitFor(redis);
 
 var app = builder.Build();
     

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
 
-namespace Dometrain.Monolith.Api.Identity;
+namespace Dometrain.Api.Shared.Identity;
 
 public class ApiKeyAuthFilter : IAuthorizationFilter
 {

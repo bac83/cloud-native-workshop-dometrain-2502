@@ -1,4 +1,4 @@
-namespace Dometrain.Monolith.Api.ShoppingCarts;
+namespace Dometrain.Cart.Api.ShoppingCarts;
 
 public static class ShoppingCartEndpointExtensions
 {

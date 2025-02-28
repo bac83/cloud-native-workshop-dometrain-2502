@@ -1,3 +1,4 @@
+using Dometrain.Api.Shared.Identity;
 using Dometrain.Monolith.Api.Students;
 using FluentValidation;
 using Microsoft.Extensions.Options;

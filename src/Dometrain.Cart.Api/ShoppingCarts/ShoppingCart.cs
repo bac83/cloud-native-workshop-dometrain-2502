@@ -1,7 +1,6 @@
-using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
-namespace Dometrain.Monolith.Api.ShoppingCarts;
+namespace Dometrain.Cart.Api.ShoppingCarts;
 
 public class ShoppingCart
 {
@@ -9,7 +8,7 @@ public class ShoppingCart
     [System.Text.Json.Serialization.JsonIgnore]
     public string Pk => StudentId.ToString();
     
-    [JsonProperty("id")] //Needed for CosmosDB
+    [JsonProperty("id")]
     public required Guid StudentId { get; set; }
 
     public List<Guid> CourseIds { get; set; } = [];
