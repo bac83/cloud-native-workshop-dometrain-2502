@@ -1,6 +1,6 @@
-using Dometrain.Cart.Api.ShoppingCarts;
 using Microsoft.Azure.Cosmos;
 using Newtonsoft.Json;
+using StackExchange.Redis;
 
 namespace Dometrain.Cart.Processor;
 
@@ -13,10 +13,13 @@ public class ChangeFeedProcessorService : BackgroundService
     private readonly CosmosClient _cosmosClient;
     private readonly ILogger<ChangeFeedProcessorService> _logger;
 
-    public ChangeFeedProcessorService(CosmosClient cosmosClient, ILogger<ChangeFeedProcessorService> logger)
+    private readonly IConnectionMultiplexer _connectionMultiplexer;
+
+    public ChangeFeedProcessorService(CosmosClient cosmosClient, ILogger<ChangeFeedProcessorService> logger, IConnectionMultiplexer connectionMultiplexer)
     {
         _cosmosClient = cosmosClient;
         _logger = logger;
+        _connectionMultiplexer = connectionMultiplexer;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -51,13 +54,17 @@ public class ChangeFeedProcessorService : BackgroundService
         {
             _logger.LogWarning("Change Feed request took longer than expected. Diagnostics: {@Diagnostics}", context.Diagnostics);
         }
-        
+
+        var db = _connectionMultiplexer.GetDatabase();
+        var batch = new List<KeyValuePair<RedisKey, RedisValue>>();
         foreach (var shoppingCart in changes)
         {
             _logger.LogInformation(JsonConvert.SerializeObject(shoppingCart));
-            await Task.Delay(10, cancellationToken);
+            var serializedCart = JsonConvert.SerializeObject(shoppingCart);
+            batch.Add(new($"cart:id:{shoppingCart.StudentId}", serializedCart));
         }
-        
+
+        await db.StringSetAsync(batch.ToArray());
         _logger.LogDebug("Finished handling changes.");
     }
 }

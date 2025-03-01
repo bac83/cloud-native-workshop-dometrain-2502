@@ -8,11 +8,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Dometrain.Aspire.ServiceDefaults\Dometrain.Aspire.ServiceDefaults.csproj" />
-      <ProjectReference Include="..\Dometrain.Cart.Api\Dometrain.Cart.Api.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Aspire.Microsoft.Azure.Cosmos" Version="9.1.0" />
+      <PackageReference Include="Aspire.StackExchange.Redis" Version="9.1.0" />
     </ItemGroup>
 
 </Project>

@@ -139,7 +139,7 @@ public class CachedShoppingCartRepository : IShoppingCartRepository
     public async Task<ShoppingCart?> GetByIdAsync(Guid studentId)
     {
         var db = _connectionMultiplexer.GetDatabase();
-        var cachedCartString = await db.StringGetAsync($"cart_id_{studentId}");
+        var cachedCartString = await db.StringGetAsync($"cart:id:{studentId}");
         if (!cachedCartString.IsNull)
         {
             return JsonSerializer.Deserialize<ShoppingCart>(cachedCartString.ToString());

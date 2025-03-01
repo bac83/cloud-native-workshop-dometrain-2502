@@ -6,6 +6,7 @@ builder.AddServiceDefaults();
 
 builder.AddAzureCosmosClient("cosmosdb");
 
+builder.AddRedisClient("redis");
 builder.Services.AddHostedService<ChangeFeedProcessorService>();
 
 var app = builder.Build();
